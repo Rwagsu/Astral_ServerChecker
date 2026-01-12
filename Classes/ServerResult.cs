@@ -9,4 +9,6 @@ public class ServerResult {
     public required Server Server { get; set; }
     public double AverageLatency { get; set; }  // In milliseconds, -1 if failed
     public double StdDev { get; set; }  // Standard deviation for stability
+
+    public string? ErrMessage { get; set; }
 }

@@ -11,33 +11,69 @@ using System.Threading.Tasks;
 using Astral_ServerChecker.Classes;
 
 class Program {
+    private static readonly string[] tipText = {
+        "Tips: Tips: Tips: Tips: Tips: Tips: Tips: Tips!",
+        "写 C++ s路一条!",
+        "你知道吗? 向石英门倒水上面也不会发生任何事.\n 嗯, 你应该知道()",
+        "现在唯一没崩过的应用就是 CLIP STUDIO PAINT...... 什么意思? o(TヘTo)",
+        "累了困了玩会 Changed / Minecraft / CLIP STUDIO PAINT / Blender / Visual Studio / Logic Pro / Davinci Resolve / Godot / Final Cut Pro / Apple Motion / Aseprite / Pixel Composer / Pixelmator Pro. \n很好玩的awa",
+        "1 + 1 = 4",
+        "憋用中文写代码! (╯‵□′)╯︵┻━┻"
+    };
+
     private const string RemoteJsonUrl = "https://raw.githubusercontent.com/ldoubil/astral.github.io/fe34c79c91463485d0ceb4aaac015e7c88e8229a/public/server.json";
     private const string EmbeddedResourceName = "Assets\\server.json";  // Replace 'EasyTierTest' with your project namespace
-    private const int TestCount = 4;  // Number of tests per server for stability
+    private const int TestCount = 12;  // Number of tests per server for stability
     private const int TestTimeoutMs = 2000;  // Timeout per test
     private const int TestIntervalMs = 500;  // Delay between tests
     private const int TopServersCount = 5;  // Number of top servers to select
 
     static async Task Main(string[] args) {
-        Console.WriteLine("欢迎使用 EasyTier 服务器测试工具！");
-        Console.WriteLine("这个工具会自动检测服务器的延迟和稳定性，适合游戏联机使用。");
-        Console.WriteLine("如果远程 JSON 下载失败，会使用内置的本地 JSON 继续。");
-        Console.WriteLine("开始测试，请稍等...");
+        Console.OutputEncoding = System.Text.Encoding.UTF8;
+
+        // Welcome text
+        Console.WriteLine(@" █████╗ ███████╗████████╗██████╗  █████╗ ██╗     
+██╔══██╗██╔════╝╚══██╔══╝██╔══██╗██╔══██╗██║     
+███████║███████╗   ██║   ██████╔╝███████║██║     
+██╔══██║╚════██║   ██║   ██╔══██╗██╔══██║██║     
+██║  ██║███████║   ██║   ██║  ██║██║  ██║███████╗
+╚═╝  ╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝");
+        Console.WriteLine(@"                                                 __ 
+ _____                     _____ _           _  |  |
+|   __|___ ___ _ _ ___ ___|     | |_ ___ ___| |_|  |
+|__   | -_|  _| | | -_|  _|   --|   | -_|  _| '_|__|
+|_____|___|_|  \_/|___|_| |_____|_|_|___|___|_,_|__|
+                                                    ");
+
+        Console.WriteLine("等待测试完毕......");
+        Console.WriteLine($"大概 {TestCount} 秒, 将很快完成.");
 
         // Try to load JSON from remote URL first
         string? jsonContent = null;
-        try {
-            using HttpClient client = new HttpClient();
-            jsonContent = await client.GetStringAsync(RemoteJsonUrl);
-            Console.WriteLine("远程 JSON 下载成功！");
-        }
-        catch (Exception ex) {
-            Console.WriteLine($"远程 JSON 下载失败：{ex.Message}");
-            Console.WriteLine("正在切换到本地嵌入的 JSON...");
+        if (args.Contains("--local")) {
+            Console.WriteLine("因为 --local 参数, 等待测试本地 JSON......");
             jsonContent = LoadEmbeddedJson();
             if (jsonContent == null) {
-                Console.WriteLine("本地 JSON 也加载失败，无法继续。");
+                Console.WriteLine("好像哪里出错了! 本地 JSON 未能加载.");
+                Console.WriteLine("已经无法继续测试. :(");
                 return;
+            }
+        }
+        else {
+            try {
+                using HttpClient client = new HttpClient();
+                jsonContent = await client.GetStringAsync(RemoteJsonUrl);
+                Console.WriteLine("从 GitHub 成功下载 JSON.");
+            }
+            catch (Exception ex) {
+                Console.WriteLine($"未能从 GitHub 下载 JSON: {ex.Message}");
+                Console.WriteLine("等待测试本地 JSON......");
+                jsonContent = LoadEmbeddedJson();
+                if (jsonContent == null) {
+                    Console.WriteLine("好像哪里出错了! 本地 JSON 也未能加载.");
+                    Console.WriteLine("已经无法继续测试. :(");
+                    return;
+                }
             }
         }
 
@@ -45,15 +81,24 @@ class Program {
         List<Server>? servers;
         try {
             servers = JsonSerializer.Deserialize<List<Server>>(jsonContent);
-            Console.WriteLine($"成功解析 {servers?.Count} 个服务器。");
+            Console.WriteLine($"解析了 {servers?.Count} 个服务器.");
         }
         catch (Exception ex) {
-            Console.WriteLine($"JSON 解析失败：{ex.Message}。可能是格式变化，请检查文件。");
+            Console.WriteLine($"JSON 无法解析: {ex.Message}");
+            Console.WriteLine($"你可以使用 --local 参数重新运行应用, 这将直接解析本地 json.");
             return;
         }
 
+        // Good tip awa
+        var random = new Random();
+        string tip = tipText[random.Next(tipText.Length)];
+        Console.ForegroundColor = ConsoleColor.Blue;
+        Console.WriteLine($"\n======================Tip======================");
+        Console.WriteLine(tip);
+        Console.WriteLine($"=====================EndTip=====================\n");
+        Console.ResetColor();
+
         // Test servers in parallel for faster execution
-        Console.WriteLine("正在并行测试所有服务器，以加速过程...");
         var tasks = servers?.Select(s => TestServerAsync(s));
 
         if (tasks == null) {
@@ -66,11 +111,30 @@ class Program {
         List<ServerResult> results = resultsArray.ToList();
 
         // Print all servers' results
-        Console.WriteLine("\n所有服务器测试结果：");
+        Console.WriteLine("\n已经全部完成!");
         foreach (var result in results) {
-            string latencyStr = result.AverageLatency >= 0 ? $"{result.AverageLatency:F2} ms" : "无法连接";
+            string latencyStr = result.AverageLatency >= 0 ? $"{result.AverageLatency:F2} ms" : "出错了! 🥳";
             string stdDevStr = result.AverageLatency >= 0 ? $"{result.StdDev:F2}" : "N/A";
-            Console.WriteLine($"服务器：{result.Server.name} ({result.Server.url}) - 平均延迟：{latencyStr}，稳定性：{stdDevStr}");
+            if (result.AverageLatency >= 0 && result.AverageLatency >= 0 && string.IsNullOrWhiteSpace(result.ErrMessage)) {
+                // If success
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.Write($"😋✅ 服务器：{result.Server.name} ({result.Server.url}) - 平均延迟：{latencyStr}，稳定性：{stdDevStr}");
+
+                // Reset console color
+                Console.ResetColor();
+
+                Console.WriteLine();
+            }
+            else {
+                // If error
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.Write($"🥳❌ 服务器：{result.Server.name} ({result.Server.url}) - 出错了! [{result.ErrMessage}]");
+
+                // Reset console color
+                Console.ResetColor();
+
+                Console.WriteLine();
+            }
         }
 
         // Find and print top fastest and most stable servers
@@ -81,17 +145,18 @@ class Program {
             .Take(TopServersCount)
             .ToList();
 
-        Console.WriteLine($"\n最快最稳定的 {TopServersCount} 个服务器（基于平均延迟和稳定性排序）：");
+        Console.WriteLine($"\n最好的 {TopServersCount} 个服务器 (基于平均延迟和稳定性排序):");
         if (topServers.Count == 0) {
-            Console.WriteLine("没有成功的测试结果。可能是网络问题，请检查连接。");
+            Console.WriteLine("好像哪里出错了!");
+            Console.WriteLine("没有任何成功的连接.");
         }
         else {
             foreach (var top in topServers) {
-                Console.WriteLine($"服务器：{top.Server.name} ({top.Server.url}) - 平均延迟：{top.AverageLatency:F2} ms，稳定性：{top.StdDev:F2}");
+                Console.WriteLine($"服务器：{top.Server.name} ({top.Server.url}) - 平均延迟：{top.AverageLatency:F2} ms，稳定性：{top.StdDev:F2}\n");
             }
         }
 
-        Console.WriteLine("\n测试结束！如果有问题，可以重新运行或检查网络。");
+        Console.WriteLine("\n测试结束啦! 给个 star 嘛awa(雾)");
     }
 
     // Load embedded JSON as fallback
@@ -119,6 +184,8 @@ class Program {
 
         List<double> latencies = new List<double>();
 
+        string? errMsg = null;
+
         for (int i = 0; i < TestCount; i++) {
             using TcpClient client = new TcpClient();
             Stopwatch sw = Stopwatch.StartNew();
@@ -130,8 +197,9 @@ class Program {
                     latencies.Add(sw.ElapsedMilliseconds);
                 }
             }
-            catch {
-                // Connection failed, ignore
+            catch (Exception ex) {
+                // Connection failed, record error message
+                errMsg = ex.Message;
             }
             finally {
                 client.Close();
@@ -141,7 +209,7 @@ class Program {
 
         double avg = latencies.Any() ? latencies.Average() : -1;
         double stdDev = latencies.Count >= 2 ? CalculateStdDev(latencies, avg) : 0;
-        return new ServerResult { Server = server, AverageLatency = avg, StdDev = stdDev };
+        return new ServerResult { Server = server, AverageLatency = avg, StdDev = stdDev, ErrMessage = errMsg };
     }
 
     // Calculate standard deviation for stability
