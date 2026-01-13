@@ -5,6 +5,13 @@ on:
     branches: [ main ]
 
 jobs:
+  TEST:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Chkpth
+      run: |
+        ls\
+        tree
   build-and-release:
     runs-on: ubuntu-latest
     if: contains(toJSON(github.event.commits.*.message), '[RELEASE]')
