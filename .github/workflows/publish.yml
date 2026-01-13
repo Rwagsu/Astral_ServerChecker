@@ -10,7 +10,7 @@ jobs:
     steps:
     - name: Chkpth
       run: |
-        ls \
+        ls
         tree
   build-and-release:
     runs-on: ubuntu-latest
