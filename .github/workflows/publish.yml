@@ -1,0 +1,92 @@
+name: Release Application
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    if: contains(github.event.head_commit.message, '[UPDATE]')  
+    # 当提交消息包含[UPDATE]时触发
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '10.0.1'  # 根据您的项目版本调整
+        
+    - name: Get project version from csproj
+      id: get-version
+      uses: KageKirin/get-csproj-version@v1  # 从csproj文件读取版本信息 [[11]]
+      with:
+        project-file: 'Astral_ServerChecker.csproj'  # 替换为您的csproj文件路径
+        
+    - name: Read CHANGELOG content
+      id: read-changelog
+      run: |
+        if [ -f CHANGE.md ]; then
+          changelog_content=$(cat CHANGE.md)
+          echo "changelog_content<<EOF" >> $GITHUB_OUTPUT
+          echo "$changelog_content" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+        else
+          echo "changelog_content=No changelog available" >> $GITHUB_OUTPUT
+        fi
+        
+    - name: Create publish directory
+      run: mkdir -p ./publish-artifacts
+      
+    - name: Publish for Windows x64
+      run: |
+        dotnet publish Astral_ServerChecker.csproj -c Release \
+          /p:PublishProfile=Publish_Win_x64.pubxml \
+          /p:PublishDir=./publish-artifacts/win-x64/
+      
+    - name: Publish for Windows Arm64
+      run: |
+        dotnet publish Astral_ServerChecker.csproj -c Release \
+          /p:PublishProfile=Publish_Win_Arm64.pubxml \
+          /p:PublishDir=./publish-artifacts/win-arm64/
+      
+    - name: Publish for macOS Arm64
+      run: |
+        dotnet publish Astral_ServerChecker.csproj -c Release \
+          /p:PublishProfile=Publish_macOS_Arm64.pubxml \
+          /p:PublishDir=./publish-artifacts/macos-arm64/
+      
+    - name: Publish for Linux x64
+      run: |
+        dotnet publish Astral_ServerChecker.csproj -c Release \
+          /p:PublishProfile=Publish_Linux_x64.pubxml \
+          /p:PublishDir=./publish-artifacts/linux-x64/
+      
+    - name: Publish for Linux Arm64
+      run: |
+        dotnet publish Astral_ServerChecker.csproj -c Release \
+          /p:PublishProfile=Publish_Linux_Arm64.pubxml \
+          /p:PublishDir=./publish-artifacts/linux-arm64/
+      
+    - name: Create ZIP archives for each platform
+      run: |
+        cd ./publish-artifacts
+        zip -r Astral_ServerChecker_Win-x64.zip win-x64/
+        zip -r Astral_ServerChecker_Win-arm64.zip win-arm64/
+        zip -r Astral_ServerChecker_macOS-arm64.zip macos-arm64/
+        zip -r Astral_ServerChecker_Linux-x64.zip linux-x64/
+        zip -r Astral_ServerChecker_Linux-arm64.zip linux-arm64/
+        cd ..
+    
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v${{ steps.get-version.outputs.version }}
+        name: Release v${{ steps.get-version.outputs.version }}
+        body: ${{ steps.read-changelog.outputs.changelog_content }}
+        files: |
+          ./publish-artifacts/*.zip
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
