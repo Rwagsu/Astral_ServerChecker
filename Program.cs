@@ -58,7 +58,7 @@ class Program {
         Console.ResetColor();
 
         Console.WriteLine("等待测试完毕......");
-        Console.WriteLine($"大概 {TestCount * (TestTimeoutMs / 1000)} 秒, 将很快完成.");
+        Console.WriteLine($"大概 {TestCount * (TestTimeoutMs / 1000.0) + (TestCount * (TestIntervalMs / 1000.0))} 秒, 将很快完成.");
 
         // View data
         Console.ForegroundColor = ConsoleColor.Yellow;
