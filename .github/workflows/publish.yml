@@ -85,7 +85,7 @@ jobs:
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: v${{ steps.get-version.outputs.informational-version }}
+        tag_name: ${{ steps.get-version.outputs.informational-version }}
         name: ${{ steps.get-version.outputs.informational-version }}
         body: ${{ steps.read-changelog.outputs.changelog_content }}
         files: |
