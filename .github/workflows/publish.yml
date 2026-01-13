@@ -26,7 +26,12 @@ jobs:
       run: |
         ls
         tree
-        echo "${{steps.get-version.outputs.assembly-version}}" 
+        echo "${{steps.get-version.outputs.version}}"
+        echo "${{steps.get-version.outputs.version-prefix}}"
+        echo "${{steps.get-version.outputs.version-suffix}}"
+        echo "${{steps.get-version.outputs.package-version}}"
+        echo "${{steps.get-version.outputs.file-version}}"
+        echo "${{steps.get-version.outputs.informational-version}}"
   build-and-release:
     runs-on: ubuntu-latest
     if: contains(toJSON(github.event.commits.*.message), '[RELEASE]')
