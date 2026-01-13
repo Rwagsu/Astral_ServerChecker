@@ -5,6 +5,12 @@ on:
     branches: [ main ]
 
 jobs:
+  build-and-rease:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Debug commit message
+      run: 'echo "Commit message: ${{ github.event.head_commit.message }}"'
+
   build-and-release:
     runs-on: ubuntu-latest
     if: contains(toJSON(github.event.commits.*.message), '[RELEASE]')
