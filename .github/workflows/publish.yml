@@ -8,6 +8,9 @@ jobs:
   build-and-release:
     runs-on: ubuntu-latest
     if: contains(toJSON(github.event.commits.*.message), '[RELEASE]')
+    permissions:
+      contents: write
+      packages: write
     
     steps:
     - name: Checkout code
