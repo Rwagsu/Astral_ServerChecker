@@ -4,7 +4,7 @@
 
 ![GitHub License](https://img.shields.io/github/license/Rwagsu/Astral_ServerChecker?style=for-the-badge&labelColor=F3F3F3&color=0077FF)
 ![GitHub Repo stars](https://img.shields.io/github/stars/Rwagsu/Astral_ServerChecker?style=for-the-badge&logo=Github&logoColor=000000&labelColor=F3F3F3&color=0077FF)
-![Status](https://img.shields.io/badge/Status-R0-FF0000?style=for-the-badge&labelColor=F3F3F3)
+![Status](https://img.shields.io/badge/Status-R1-FF0000?style=for-the-badge&labelColor=F3F3F3)
 ![GitHub Downloads](https://img.shields.io/github/downloads/Rwagsu/Astral_ServerChecker/total?style=for-the-badge&logo=githubactions&logoColor=000000&labelColor=F3F3F3&color=0077FF)
 
 Astral 的服务器延迟检测被砍掉了, 一气之下整了个这玩意()

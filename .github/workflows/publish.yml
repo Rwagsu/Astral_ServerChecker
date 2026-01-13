@@ -16,10 +16,17 @@ jobs:
       with:
         dotnet-version: '10.0.101'
 
+    - name: Setup .NET
+      uses: kzrnm/get-net-sdk-project-versions-action@v2
+      id: get-version
+      with:
+        proj-path: Astral_ServerChecker.csproj
+
     - name: Chkpth
       run: |
         ls
         tree
+        echo "${{steps.get-version.outputs.assembly-version}}" 
   build-and-release:
     runs-on: ubuntu-latest
     if: contains(toJSON(github.event.commits.*.message), '[RELEASE]')

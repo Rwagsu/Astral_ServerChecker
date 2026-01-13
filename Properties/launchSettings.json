@@ -1,8 +1,7 @@
 {
   "profiles": {
     "Astral_ServerChecker": {
-      "commandName": "Project",
-      "commandLineArgs": "--count 5\r\n--top 3"
+      "commandName": "Project"
     }
   }
 }
