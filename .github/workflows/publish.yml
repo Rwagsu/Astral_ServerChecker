@@ -5,19 +5,9 @@ on:
     branches: [ main ]
 
 jobs:
-  build-and-rease:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Debug commit message
-      run: |
-        echo "Commit message: ${{ github.event.head_commit.message }}"
-        echo "Commit message11: ${{ github.event.commits[0].message }}"
-        echo "Commit message11: ${{ toJSON(github.event.commits.*.message) }}"
-
   build-and-release:
     runs-on: ubuntu-latest
     if: contains(toJSON(github.event.commits.*.message), '[RELEASE]')
-    # 当提交消息包含[RELEASE]时触发
     
     steps:
     - name: Checkout code
@@ -26,13 +16,13 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: '10.0.1'  # 根据您的项目版本调整
+        dotnet-version: '10.0.1'
         
     - name: Get project version from csproj
       id: get-version
-      uses: KageKirin/get-csproj-version@v1  # 从csproj文件读取版本信息 [[11]]
+      uses: KageKirin/get-csproj-version@v1
       with:
-        project-file: 'Astral_ServerChecker.csproj'  # 替换为您的csproj文件路径
+        project-file: 'Astral_ServerChecker.csproj'
         
     - name: Read CHANGELOG content
       id: read-changelog
