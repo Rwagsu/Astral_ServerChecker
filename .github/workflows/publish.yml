@@ -5,45 +5,6 @@ on:
     branches: [ main ]
 
 jobs:
-  TEST:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: '10.0.101'
-
-    - name: Setup .NET
-      uses: kzrnm/get-net-sdk-project-versions-action@v2
-      id: get-version
-      with:
-        proj-path: Astral_ServerChecker.csproj
-
-    - name: Chkpth
-      run: |
-        ls
-        tree
-        echo "${{steps.get-version.outputs.version}}"
-        echo "${{steps.get-version.outputs.version-prefix}}"
-        echo "${{steps.get-version.outputs.version-suffix}}"
-        echo "${{steps.get-version.outputs.package-version}}"
-        echo "${{steps.get-version.outputs.file-version}}"
-        echo "${{steps.get-version.outputs.informational-version}}"
-
-    - name: Read CHANGELOG content
-      id: read-changelog
-      run: |
-        if [ -f CHANGE.md ]; then
-          changelog_content=$(cat CHANGE.md)
-          echo "changelog_content<<EOF" >> $GITHUB_OUTPUT
-          echo "$changelog_content" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-        else
-          echo "changelog_content=No changelog available" >> $GITHUB_OUTPUT
-        fi
   build-and-release:
     runs-on: ubuntu-latest
     if: contains(toJSON(github.event.commits.*.message), '[RELEASE]')
