@@ -9,7 +9,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Debug commit message
-      run: 'echo "Commit message: ${{ github.event.head_commit.message }}"'
+      run: |
+        echo "Commit message: ${{ github.event.head_commit.message }}"
+        echo "Commit message11: ${{ github.event.commits[0].message }}"
+        echo "Commit message11: ${{ toJSON(github.event.commits.*.message) }}"
 
   build-and-release:
     runs-on: ubuntu-latest
